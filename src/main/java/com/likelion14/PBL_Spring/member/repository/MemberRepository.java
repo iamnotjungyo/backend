@@ -9,4 +9,6 @@ public interface MemberRepository {
     Role findByName(String name);
     List<Role> findAll();
     boolean existsByName(String name);
+    void updateByName(String name, Role role);
+    boolean deleteMember(String name);
 }
