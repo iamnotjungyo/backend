@@ -1,12 +1,9 @@
 package com.likelion14.PBL_Spring;
 
-import com.likelion14.PBL_Spring.member.config.AppConfig;
 import com.likelion14.PBL_Spring.member.service.MemberService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-
-import java.util.Arrays;
 
 @SpringBootApplication
 public class PblSpringApplication {

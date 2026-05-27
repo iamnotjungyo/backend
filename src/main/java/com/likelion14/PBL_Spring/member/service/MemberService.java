@@ -1,8 +1,7 @@
 package com.likelion14.PBL_Spring.member.service;
 
-import com.likelion14.PBL_Spring.member.domain.role.Lion;
-import com.likelion14.PBL_Spring.member.domain.role.Role;
-import com.likelion14.PBL_Spring.member.domain.role.Staff;
+import com.likelion14.PBL_Spring.member.domain.Member;
+import com.likelion14.PBL_Spring.member.domain.RoleType;
 import com.likelion14.PBL_Spring.member.dto.LionCreateRequest;
 import com.likelion14.PBL_Spring.member.dto.LionUpdateRequest;
 import com.likelion14.PBL_Spring.member.dto.StaffCreateRequest;
@@ -22,63 +21,74 @@ public class MemberService {
         this.repository = repository;
     }
 
-    public boolean register(Role member) {
-        if (repository.existsByName(member.getName())) {
+    // 이름으로 검색
+    public Member searchByName(String name) {
+        return (Member) repository.findByName(name).orElse(null);
+   }
+    // 전체 조회
+    public List<Member> getAllMembers() {
+        return repository.findAll();
+    }
+
+    // ID로 조회
+    public Member findById(Long id) {
+        return (Member) repository.findById(id).orElse(null);
+    }
+
+    // 삭제
+    public boolean deleteMember(Long id) {
+        if (!repository.existsById(id)) {
             return false;
         }
-        repository.save(member);
+        repository.deleteById(id);
         return true;
     }
-    public Role searchByName(String name) { return repository.findByName(name); }
 
-    public List<Role> getAllMembers() { return repository.findAll(); }
-
-    public boolean isEmpty() { return repository.findAll().isEmpty(); }
-
-    public Role createLion(LionCreateRequest request) {
-        Lion lion = new Lion(request.getName(), request.getMajor(), request.getGeneration(),
-        request.getPart(), request.getStudentId());
-
-        if(repository.existsByName(lion.getName())) {
+    // Lion 등록
+    public Member createLion(LionCreateRequest request) {
+        if (repository.existsByName(request.getName())) {
             return null;
         }
-        repository.save(lion);
-        return lion;
+        Member member = Member.builder()
+                .name(request.getName())
+                .major(request.getMajor())
+                .generation(request.getGeneration())
+                .part(request.getPart())
+                .roleType(RoleType.LION)
+                .build();
+
+        return repository.save(member);
     }
 
-    public Role createStaff(StaffCreateRequest request) {
-        Staff staff = new Staff(request.getName(), request.getMajor(), request.getGeneration(),
-                request.getPart(), request.getPosition());
-        if(repository.existsByName(staff.getName())) {
+    // Staff 등록
+    public Member createStaff(StaffCreateRequest request) {
+        if (repository.existsByName(request.getName())) {
             return null;
         }
-        repository.save(staff);
-        return staff;
+        Member member = new Member(request.getName(), request.getMajor(), request.getGeneration(),
+                request.getPart(), RoleType.LION, null, request.getPosition());
+        return repository.save(member);
     }
 
-    public Role updateLion(String name, LionUpdateRequest request) {
-        if (!repository.existsByName(name)) {
+    // Lion 수정
+    public Member updateLion(Long id, LionUpdateRequest request) {
+        Member member = (Member) repository.findById(id).orElse((null));
+        if (member == null) {
             return null;
         }
-
-        Lion updated = new Lion(name, request.getMajor(), request.getGeneration(),
-                request.getPart(), request.getStudentId());
-        repository.updateByName(name, updated);
-        return updated;
+        member.updateInfo(request.getMajor(), request.getGeneration(), request.getPart());
+        member.updatePosition(request.getStudentId());
+        return repository.save(member);
     }
 
-    public Role updateStaff(String name, StaffUpdateRequest request) {
-        if(!repository.existsByName(name)) {
+    // Staff 수정
+    public Member updateStaff(Long id, StaffUpdateRequest request) {
+        Member member = (Member) repository.findById(id).orElse((null));
+        if (member == null) {
             return null;
         }
-
-        Staff updated = new Staff(name, request.getMajor(), request.getGeneration(),
-                request.getPart(), request.getPosition());
-        repository.updateByName(name, updated);
-        return updated;
-    }
-
-    public boolean deleteMember(String name) {
-        return repository.deleteMember(name);
+        member.updateInfo(request.getMajor(), request.getGeneration(), request.getPart());
+        member.updatePosition(request.getPosition());
+        return repository.save(member);
     }
 }
